@@ -26,9 +26,9 @@ public enum OGGConverterError: Error {
 
 public class OGGConverter {
 
-    public static func convertOpusOGGToM4aFile(src: URL, dest: URL) throws {
+    public static func convertOpusOGGToM4aFile(srcData: Data, dest: URL) throws {
         do {
-            let data = try Data(contentsOf: src)
+            let data = srcData
             let decoder = try OGGDecoder(audioData: data)
             let layoutTag = decoder.numChannels == 1
                 ? kAudioChannelLayoutTag_Mono
@@ -54,7 +54,7 @@ public class OGGConverter {
         }
     }
     
-    public static func convertM4aFileToOpusOGG(src: URL, dest: URL) throws {
+    public static func convertM4aFileToOpusOGG(src: URL) throws -> Data {
         do {
             let srcFile = try AVAudioFile(
                 forReading: src,
@@ -75,7 +75,7 @@ public class OGGConverter {
             let data = Data(bytes: channels[0], count: length)
             try encoder.encode(pcm: data)
             let opus = encoder.bitstream(flush: true)
-            try opus.write(to: dest)
+            return opus
         } catch let error as OGGConverterError  {
             throw error
         } catch {
